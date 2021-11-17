@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+npm install --save-dev --workspace "./packages/$PACKAGE_NAME" prettier
+
+cat <<'EOF' > "./packages/$PACKAGE_NAME/.prettierignore"
+coverage
+package-lock.json
+tsconfig.json
+EOF

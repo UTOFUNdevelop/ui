@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+echo_sleep() {
+  echo "$@"
+  sleep 1
+}
+
+(
+  # package name:
+  echo_sleep "@utofun/$PACKAGE_NAME"
+
+  # version:
+  echo_sleep '1.0.0'
+
+  # description:
+  echo_sleep ''
+
+  # entry point:
+  echo_sleep 'src/index.ts'
+
+  # test command:
+  echo_sleep 'set -o errexit -o nounset -o xtrace && jest && eslint --fix --ext .tsx,.ts,.jsx,.js . && tsc && prettier --write .'
+
+  # git repository:
+  echo_sleep ''
+
+  # keywords:
+  echo_sleep @utofun
+
+  # author:
+  echo_sleep ''
+
+  # license:
+  echo_sleep 'UNLICENSED'
+
+  # Is this OK?
+  echo 'yes'
+) | npm init --scope @utofun --workspace "packages/$PACKAGE_NAME"
+
+mkdir "./packages/$PACKAGE_NAME/src"
+
+cat <<'JAVASCRIPT' > "./packages/$PACKAGE_NAME/src/index.ts"
+export default "hello world";
+JAVASCRIPT
+
+cat <<'JAVASCRIPT' > "./packages/$PACKAGE_NAME/src/index.test.ts"
+import helloWorld from ".";
+
+it("should return hello world", () => {
+  expect(helloWorld).toBe("hello world");
+});
+JAVASCRIPT

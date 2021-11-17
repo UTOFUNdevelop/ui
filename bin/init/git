@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+git add "./packages/$PACKAGE_NAME"
+git commit --message "Init @utofun/$PACKAGE_NAME"

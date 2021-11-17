@@ -1,0 +1,57 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+npm install --save-dev --workspace "./packages/$PACKAGE_NAME" \
+  ts-node \
+  @types/jest \
+  jest \
+  ts-jest
+
+cd "./packages/$PACKAGE_NAME"
+
+key_down='\033[B'
+
+echo_sleep() {
+  echo "$@"
+  sleep 1.2
+}
+
+(
+  # The following questions will help Jest to create a suitable configuration for your project
+  sleep 4
+
+  # ✔ Would you like to use Jest when running "test" script in "package.json"? … no
+  echo_sleep n
+
+  # ✔ Would you like to use Typescript for the configuration file? … yes
+  echo_sleep y
+
+  # ✔ Choose the test environment that will be used for testing › node
+  echo_sleep "$key_down"
+
+  # ✔ Do you want Jest to add coverage reports? … yes
+  echo_sleep y
+
+  # ✔ Which provider should be used to instrument code for coverage? › v8
+  echo_sleep ''
+
+  # ✔ Automatically clear mock calls and instances between every test? … no
+  echo_sleep n
+
+  # 📝  Configuration file created at .../packages/.../jest.config.ts
+  sleep 2
+) | npx jest --init
+
+# `npx ts-jest config:init` doesn't work with existing jest config
+# shellcheck disable=SC1004 #https://github.com/koalaman/shellcheck/wiki/SC1004#exceptions
+sed -i.bak \
+  -e '1i\
+/* eslint max-len: ["error", { "ignoreComments": true }] */' \
+  -e '\@// preset: undefined,@{
+s@// @@
+s@undefined@'\''ts-jest'\''@
+}' \
+  jest.config.ts
+rm jest.config.ts.bak
