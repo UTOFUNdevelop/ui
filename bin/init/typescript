@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+npm install --save-prod --workspace "./packages/$PACKAGE_NAME" ts-node typescript
+
+cd "./packages/$PACKAGE_NAME"
+tsc --init
+sed -i.bak '\@// "noEmit": true,@s@// @@' tsconfig.json
+rm tsconfig.json.bak

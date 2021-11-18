@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+./bin/init/next
+./bin/init/storybook
+./bin/init/jest
+./bin/init/prettier
+./bin/init/eslint
+./bin/test "$PACKAGE_NAME"
+./bin/init/git

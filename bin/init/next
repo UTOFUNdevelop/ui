@@ -1,0 +1,91 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+: "${PACKAGE_NAME:?}"
+
+cd './packages'
+echo "$PACKAGE_NAME" | npx create-next-app@latest --typescript
+
+cd "$PACKAGE_NAME"
+
+# shellcheck disable=SC1004 # https://github.com/koalaman/shellcheck/wiki/SC1004#exceptions
+sed -i.bak \
+  -e 's="name": "web",="name": "@utofun/web",=' \
+  -e '/"start": "next start",/a\
+    "test": "set -o errexit -o nounset -o xtrace && jest && eslint --fix --ext .tsx,.ts,.jsx,.js . && tsc && prettier --write .",' \
+  package.json
+rm package.json.bak
+
+npm install --save-dev @testing-library/react
+
+# ts-jest doesn't recognise jsx without global React with "preserve"
+sed -i.bak \
+  's/"jsx": "preserve",/"jsx": "react-jsx",/' \
+  tsconfig.json
+rm tsconfig.json.bak
+
+mkdir src
+mv pages public styles src
+
+# ts-jest doens't recognise *.css
+sed -Ei.bak \
+  -e "\@import styles from '../styles/Home.module.css'@d" \
+  -e 's@ className={styles\.[[:alpha:]]+}@@' \
+  ./src/pages/index.tsx
+rm ./src/pages/index.tsx.bak
+
+rm -fr ./src/pages/api ./src/styles ./src/pages/_app.tsx
+
+# Hide .test and .stories routes
+# https://nextjs.org/docs/api-reference/next.config.js/custom-page-extensions#including-non-page-files-in-the-pages-directory
+sed -i.bak "/module.exports = {/a\\
+  pageExtensions: ['page.tsx'],
+" next.config.js
+rm next.config.js.bak
+mv ./src/pages/index.tsx ./src/pages/index.page.tsx
+
+cat <<'JAVASCRIPT' > ./src/pages/createTemplate.tsx
+import React from "react";
+
+export default function createTemplate(Component: React.ComponentType) {
+  return function Template(args: {}) {
+    // Isolate eslint-disable-next-line to a single place
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <Component {...args} />;
+  };
+}
+JAVASCRIPT
+
+cat <<'JAVASCRIPT' > ./src/pages/index.stories.tsx
+import { ComponentStory, ComponentMeta } from "@storybook/react";
+import createTemplate from "./createTemplate";
+
+import Home from "./index.page";
+
+export default {
+  title: "Web/Home",
+  component: Home,
+} as ComponentMeta<typeof Home>;
+
+const Template: ComponentStory<typeof Home> = createTemplate(Home);
+
+export const Render = Template.bind({});
+Render.args = {
+  children: null,
+};
+JAVASCRIPT
+
+cat <<'JAVASCRIPT' > ./src/pages/index.test.tsx
+import { render, screen } from "@testing-library/react";
+import Home from "./index.page";
+
+it("should render Home", async () => {
+  const expected = "Welcome to Next.js!";
+
+  render(<Home />);
+
+  const actual = screen.getByText("Welcome to").textContent;
+
+  expect(actual).toBe(expected);
+});
+JAVASCRIPT

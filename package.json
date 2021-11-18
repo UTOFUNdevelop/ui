@@ -1,0 +1,27 @@
+{
+  "name": "@utofun/ui",
+  "version": "1.0.0",
+  "description": "monorepo for utofun ui",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UTOFUNdevelop/ui.git"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "typescript"
+  ],
+  "author": "it@utofun.com",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/UTOFUNdevelop/ui/issues"
+  },
+  "homepage": "https://github.com/UTOFUNdevelop/ui#readme",
+  "workspaces": [
+    "./packages/*"
+  ]
+}
