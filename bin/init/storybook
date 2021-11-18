@@ -4,5 +4,9 @@ set -o errexit -o nounset -o xtrace
 : "${PACKAGE_NAME:?}"
 
 cd "./packages/$PACKAGE_NAME"
+
 npx sb init
 rm -fr ./src/stories/
+
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME storybook"

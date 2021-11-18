@@ -89,3 +89,10 @@ it("should render Home", async () => {
   expect(actual).toBe(expected);
 });
 JAVASCRIPT
+
+# Conform to eslint react/function-component-definition autofix
+sed -i.bak '/const Home: NextPage = () => {/s/() =>/function ()/' ./src/pages/index.page.tsx
+rm ./src/pages/index.page.tsx.bak
+
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME next"

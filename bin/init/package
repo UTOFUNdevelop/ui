@@ -40,16 +40,21 @@ echo_sleep() {
   echo 'yes'
 ) | npm init --scope @utofun --workspace "packages/$PACKAGE_NAME"
 
-mkdir "./packages/$PACKAGE_NAME/src"
+cd "./packages/$PACKAGE_NAME"
 
-cat <<'JAVASCRIPT' > "./packages/$PACKAGE_NAME/src/index.ts"
+mkdir ./src
+
+cat <<'JAVASCRIPT' > "./src/index.ts"
 export default "hello world";
 JAVASCRIPT
 
-cat <<'JAVASCRIPT' > "./packages/$PACKAGE_NAME/src/index.test.ts"
+cat <<'JAVASCRIPT' > "./src/index.test.ts"
 import helloWorld from ".";
 
 it("should return hello world", () => {
   expect(helloWorld).toBe("hello world");
 });
 JAVASCRIPT
+
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME package"
