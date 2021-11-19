@@ -104,3 +104,7 @@ a\
         "react/react-in-jsx-scope": "off"' \
   .eslintrc.json
 rm .eslintrc.json.bak
+
+npx --yes prettier --write .
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME eslint"

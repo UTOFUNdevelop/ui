@@ -5,8 +5,12 @@ set -o errexit -o nounset -o xtrace
 
 npm install --save-dev --workspace "./packages/$PACKAGE_NAME" prettier
 
-cat <<'EOF' > "./packages/$PACKAGE_NAME/.prettierignore"
+cd "./packages/$PACKAGE_NAME"
+
+cat <<'EOF' > ".prettierignore"
 coverage
 package-lock.json
-tsconfig.json
 EOF
+
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME prettier"

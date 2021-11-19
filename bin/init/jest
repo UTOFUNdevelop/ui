@@ -55,3 +55,7 @@ s@undefined@'\''ts-jest'\''@
 }' \
   jest.config.ts
 rm jest.config.ts.bak
+
+npx --yes prettier --write .
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME jest"

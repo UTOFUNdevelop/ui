@@ -6,6 +6,14 @@ set -o errexit -o nounset -o xtrace
 npm install --save-prod --workspace "./packages/$PACKAGE_NAME" ts-node typescript
 
 cd "./packages/$PACKAGE_NAME"
+
 tsc --init
 sed -i.bak '\@// "noEmit": true,@s@// @@' tsconfig.json
 rm tsconfig.json.bak
+
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME typescript"
+
+npx --yes prettier --write .
+git add .
+git commit --message "Init @utofun/$PACKAGE_NAME typescript autofix"
