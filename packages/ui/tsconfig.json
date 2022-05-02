@@ -1,4 +1,10 @@
 {
+  "exclude": [
+    "src/App.tsx",
+    "src/App.test.tsx",
+    "src/index.tsx",
+    "src/reportWebVitals.ts",
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
