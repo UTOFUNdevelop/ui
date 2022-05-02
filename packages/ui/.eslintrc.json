@@ -22,5 +22,15 @@
     "react",
     "@typescript-eslint"
   ],
-  "rules": {}
+  "rules": {
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  }
 }
