@@ -31,6 +31,15 @@
           ".tsx"
         ]
       }
+    ],
+    "react/jsx-props-no-spreading": [
+      "error",
+      {
+        "html": "enforce",
+        "custom": "ignore",
+        "explicitSpread": "ignore",
+        "exceptions": []
+      }
     ]
   }
 }
