@@ -56,6 +56,21 @@
           "off"
         ]
       }
+    },
+    {
+      "files": [
+        "*.stories.tsx"
+      ],
+      "rules": {
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            "devDependencies": [
+              "**/*.stories.tsx"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
