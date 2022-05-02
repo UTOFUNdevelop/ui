@@ -19,5 +19,5 @@ module.exports = {
       "react-native": "react-native-web",
     };
     return config;
-  }
+  },
 };
