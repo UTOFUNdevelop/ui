@@ -1,0 +1,424 @@
+#!/usr/bin/env sh
+set -o errexit -o nounset -o xtrace
+
+PACKAGE_NAME="${PACKAGE_NAME:?}"
+package_dir="./packages/$PACKAGE_NAME"
+package_full_name="@utofun/$PACKAGE_NAME"
+
+sash_key_down='\033[B'
+
+sash_dirty_workspace() {
+  [ -n "$(git status --porcelain package-lock.json "$package_dir")" ]
+}
+
+sash_echo_sleep() {
+  echo "$@"
+  sleep 1.2
+}
+
+sash_git_commit_workspace() {
+  git add package-lock.json "$package_dir"
+  git commit "$@"
+}
+
+sash_last() {
+  for last in "$@"; do
+    :
+  done
+  echo "$last"
+}
+
+sash_jq_replace() {
+  printf %s "$(jq "$@")" > "$(sash_last "$@")"
+}
+
+sash_npm_install_workspace() {
+  npm install --workspace "$package_full_name" "$@"
+}
+
+sash_npx() {
+  npx --yes "$@"
+}
+
+sash_sed_i() {
+  sed -i '' "$@"
+}
+
+sash_switch_fall_through() {
+  state="$1"; shift
+  for command in "$@"; do
+    if [ "$state" = "$command" ]; then
+      break;
+    else
+      shift
+    fi
+  done
+  for command in "$@"; do
+    author_date="$(date -R)"
+    $command
+    if sash_dirty_workspace; then
+      sash_git_commit_workspace --date "$author_date" --message "Apply \`$command\` to $package_full_name"
+    else
+      printf "INFO: \`%s\` doesn't commit\n" "$command"
+    fi
+  done
+}
+
+clean() {
+  rm -fr "$package_dir"
+}
+
+npx_create_react_app() {
+  sash_npx create-react-app "$package_dir" --template typescript
+}
+
+npx_prettier_workspace() {
+  npx prettier --write "$(find "$package_dir" -name '.js' -o -name '.ts' -o -name '.tsx')"
+}
+
+jq_package_json_name_prepend_namespace() {
+  sash_jq_replace '.name = "@utofun/" + .name' "$package_dir/package.json"
+}
+
+npm_install_link_workspace() {
+  npm install
+}
+
+npm_install_native_base() {
+  sash_npm_install_workspace react-native-web native-base react-native-svg \
+    react-native-safe-area-context
+}
+
+npm_install_prop_types() {
+  sash_npm_install_workspace prop-types
+}
+
+npm_install_prettier() {
+  sash_npm_install_workspace --save-dev prettier
+}
+
+npm_init_eslint_config() {
+  (
+    sleep 4
+
+    # How would you like to use ESLint? · style
+    sash_echo_sleep "$sash_key_down"
+
+    # What type of modules does your project use? · esm
+    sash_echo_sleep ''
+
+    # Which framework does your project use? · none
+    sash_echo_sleep ''
+
+    # Does your project use TypeScript? · Yes
+    sash_echo_sleep "$sash_key_down"
+
+    # Where does your code run? · browser, node
+    sash_echo_sleep a
+
+    # How would you like to define a style for your project? · guide
+    sash_echo_sleep ''
+
+    # Which style guide do you want to follow? · airbnb
+    sash_echo_sleep ''
+
+    # What format do you want your config file to be in? · JSON
+    sash_echo_sleep "$sash_key_down$sash_key_down"
+
+    # Would you like to install them now with npm? · Yes
+    echo ''
+  ) | npm_config_workspace="$package_full_name" npm init --yes @eslint/config
+
+  # Fix side-effect
+  mv "$package_full_name/.eslintrc.json" "$package_dir"
+  rmdir -p "$package_full_name"
+}
+
+npm_install_eslint_config_prettier() {
+  sash_npm_install_workspace --save-dev eslint-config-prettier
+}
+
+npx_sb_init() {
+  cd "$package_dir"
+  echo y | sash_npx sb init
+  cd -
+}
+
+file_replace_src_app() {
+  cat <<'JAVASCRIPT' > "$package_dir/src/app.tsx"
+import React from "react";
+import { NativeBaseProvider, Box } from "native-base";
+
+export default function App() {
+  return (
+    <NativeBaseProvider>
+      <Box>Hello world</Box>
+    </NativeBaseProvider>
+  );
+}
+JAVASCRIPT
+}
+
+file_replace_src_lib_nativebase() {
+  mkdir -p "$package_dir/src/lib/NativeBase/"
+  cat <<'JAVASCRIPT' > "$package_dir/src/lib/NativeBase/index.stories.tsx"
+import { ComponentStory, ComponentMeta } from "@storybook/react";
+import React from "react";
+
+import NativeBase from ".";
+
+export default {
+  // https://github.com/storybookjs/storybook/issues/16038
+  title: "@utofun ui/NativeBase",
+  component: NativeBase,
+  argTypes: {},
+} as ComponentMeta<typeof NativeBase>;
+
+const Template: ComponentStory<typeof NativeBase> = function Template(args) {
+  return <NativeBase {...args} />;
+};
+
+export const Children = Template.bind({});
+Children.args = {
+  children: "Hello NativeBase",
+};
+JAVASCRIPT
+
+  cat <<'JAVASCRIPT' > "$package_dir/src/lib/NativeBase/index.tsx"
+import { Box, NativeBaseProvider } from "native-base";
+import PropTypes, { InferProps } from "prop-types";
+import React from "react";
+
+const nativeBasePropTypes = {
+  children: PropTypes.node.isRequired,
+};
+type NativeBaseProps = InferProps<typeof nativeBasePropTypes>;
+export default function NativeBase({ children }: NativeBaseProps) {
+  return (
+    <NativeBaseProvider>
+      <Box>{children}</Box>
+    </NativeBaseProvider>
+  );
+}
+NativeBase.propTypes = nativeBasePropTypes;
+JAVASCRIPT
+}
+
+jscodeshift_storybook_main_resolve_react_native() {
+  sash_npx jscodeshift --transform ./bin/init/jscodeshift_storybook_main_resolve_react_native.js "$package_dir/.storybook/main.js"
+}
+
+jq_eslintrc_format() {
+  sash_jq_replace '.' "$package_dir/.eslintrc.json"
+}
+
+jq_eslintrc_extend_eslint_config_prettier() {
+  sash_jq_replace '.extends += ["prettier"]' "$package_dir/.eslintrc.json"
+}
+
+jq_eslintrc_add_jest_to_eslint_env() {
+  sash_jq_replace '.env += {"jest": true}' "$package_dir/.eslintrc.json"
+}
+
+jq_eslintrc_add_tsx_to_react_jsx_filename_extension() {
+  rules=$(cat <<'JSON'
+{
+  "react/jsx-filename-extension": [
+    "error",
+    {
+      "extensions": [
+        ".jsx",
+        ".tsx"
+      ]
+    }
+  ]
+}
+JSON
+)
+  sash_jq_replace ".rules += $rules" "$package_dir/.eslintrc.json"
+}
+
+jq_eslintrc_ignore_custom_react_jsx_props_no_spreading() {
+  rules=$(cat <<'JSON'
+{
+  "react/jsx-props-no-spreading": [
+    "error",
+    {
+      "html": "enforce",
+      "custom": "ignore",
+      "explicitSpread": "ignore",
+      "exceptions": []
+    }
+  ]
+}
+JSON
+)
+  sash_jq_replace ".rules += $rules" "$package_dir/.eslintrc.json"
+}
+
+jq_eslintrc_ignore_ts_import() {
+  overrides=$(cat <<'JSON'
+[
+  {
+    "files": [
+      "*.ts",
+      "*.tsx"
+    ],
+    "rules": {
+      "import/no-unresolved": [
+        "off"
+      ],
+      "import/extensions": [
+        "off"
+      ]
+    }
+  }
+]
+JSON
+)
+  sash_jq_replace ".overrides += $overrides" "$package_dir/.eslintrc.json"
+}
+
+file_replace_eslintrc() {
+  cat <<'ESLINTIGNORE' > "$package_dir/.eslintignore"
+src/stories/Button.stories.tsx
+src/stories/Button.tsx
+src/stories/Header.stories.tsx
+src/stories/Header.tsx
+src/stories/Introduction.stories.mdx
+src/stories/Page.stories.tsx
+src/stories/Page.tsx
+src/stories/assets
+src/stories/button.css
+src/stories/header.css
+src/stories/page.css
+ESLINTIGNORE
+}
+
+jq_eslintrc_allow_stories_import_no_extraneous_dependencies() {
+  overrides=$(cat <<'JSON'
+[
+  {
+    "files": ["*.stories.tsx"],
+    "rules": {
+      "import/no-extraneous-dependencies": [
+        "error",
+        {
+          "devDependencies": [
+            "**/*.stories.tsx"
+          ]
+        }
+      ]
+    }
+  }
+]
+JSON
+)
+  sash_jq_replace ".overrides += $overrides" "$package_dir/.eslintrc.json"
+}
+
+jq_package_json_set_npm_test() {
+  # shellcheck disable=SC2016
+  sash_jq_replace --arg SCRIPTS_TEST \
+    "set -o errexit -o nounset -o xtrace; \
+eslint '**/*.ts' '**/*.tsx'; \
+tsc --noEmit; \
+prettier --write --loglevel warn '**/*.js' '**/*.ts' '**/*.tsx'" \
+    '.scripts.test = $SCRIPTS_TEST' "$package_dir/package.json"
+}
+
+file_replace_src_lib_index() {
+  cat <<'JAVASCRIPT' > "$package_dir/src/lib/index.tsx"
+export { default as NativeBase } from "./NativeBase";
+export default null;
+JAVASCRIPT
+}
+
+jq_package_json_set_main_src_lib_index() {
+  sash_jq_replace '.main = "src/lib/index.tsx"' "$package_dir/package.json"
+  sash_jq_replace '.files = ["src/lib/*/index.tsx"]' "$package_dir/package.json"
+}
+
+jq_package_json_set_files_src_lib_index() {
+  sash_jq_replace '.main = "src/lib/index.tsx"' "$package_dir/package.json"
+  sash_jq_replace '.files = ["src/lib/*/index.tsx"]' "$package_dir/package.json"
+}
+
+npm_test_workspace() {
+  npm test --workspace "$package_full_name"
+}
+
+npm_install_typescript() {
+  sash_npm_install_workspace --save-dev typescript
+}
+
+npm_install_postcss_preset_env() {
+  sash_npm_install_workspace --save-dev postcss-preset-env
+}
+
+jq_package_json_npm_run_storybook_disable_eslint_plugin() {
+  sash_jq_replace '.scripts.storybook = "DISABLE_ESLINT_PLUGIN=true " + .scripts.storybook' "$package_dir/package.json"
+}
+
+jq_package_json_npm_run_build_storybook_disable_eslint_plugin() {
+  sash_jq_replace '.scripts["build-storybook"] = "DISABLE_ESLINT_PLUGIN=true " + .scripts["build-storybook"]' "$package_dir/package.json"
+}
+
+npx_tsc_init() {
+  cd "$package_dir"
+  sash_npx tsc --init
+  cd -
+}
+
+sed_tsconfig_jsx_preserved() {
+  sash_sed_i '\@// "jsx": "preserve",@s@// \("jsx": "preserve",\)@\1   @' "$package_dir/tsconfig.json"
+}
+
+sed_tsconfig_exclude_create_react_app() {
+  sash_sed_i '1a\
+  "exclude": [\
+    "src/App.tsx",\
+    "src/App.test.tsx",\
+    "src/index.tsx",\
+    "src/reportWebVitals.ts",\
+  ],
+' "$package_dir/tsconfig.json"
+}
+
+sash_switch_fall_through "${1:-npx_create_react_app}" \
+  clean \
+  npx_create_react_app \
+  npx_prettier_workspace \
+  jq_package_json_name_prepend_namespace \
+  npm_install_link_workspace \
+  npm_install_native_base \
+  npm_install_prop_types \
+  npm_install_prettier \
+  npm_init_eslint_config \
+  npm_install_eslint_config_prettier \
+  npx_sb_init \
+  file_replace_src_app \
+  npx_prettier_workspace \
+  jscodeshift_storybook_main_resolve_react_native \
+  npx_prettier_workspace \
+  file_replace_src_lib_nativebase \
+  jq_eslintrc_format \
+  jq_eslintrc_extend_eslint_config_prettier \
+  jq_eslintrc_add_jest_to_eslint_env \
+  jq_eslintrc_add_tsx_to_react_jsx_filename_extension \
+  jq_eslintrc_ignore_custom_react_jsx_props_no_spreading \
+  jq_eslintrc_ignore_ts_import \
+  file_replace_eslintrc \
+  jq_eslintrc_allow_stories_import_no_extraneous_dependencies \
+  jq_package_json_set_npm_test \
+  file_replace_src_lib_index \
+  jq_package_json_set_main_src_lib_index \
+  jq_package_json_set_files_src_lib_index \
+  npm_install_typescript \
+  npm_install_postcss_preset_env \
+  jq_package_json_npm_run_storybook_disable_eslint_plugin \
+  jq_package_json_npm_run_build_storybook_disable_eslint_plugin \
+  npx_tsc_init \
+  sed_tsconfig_jsx_preserved \
+  sed_tsconfig_exclude_create_react_app \
+  npm_test_workspace
