@@ -1,2 +1,3 @@
-export { default as NativeBase } from "./NativeBase";
+export { default as Provider } from "./Provider";
+export { default as Navbar } from "./Navbar";
 export default null;
