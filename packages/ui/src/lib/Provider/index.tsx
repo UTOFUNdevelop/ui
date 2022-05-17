@@ -5,6 +5,7 @@ import PropTypes, { InferProps } from "prop-types";
 const theme = extendTheme({
   colors: {
     white: "#FFFFFF",
+    black: "#000000",
     support: "#4A4C5B",
     background: "#F3F4F5",
     primary: {
