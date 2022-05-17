@@ -1,7 +1,7 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import React from "react";
 
-import Provider from "../Providor";
+import Provider from "../Provider";
 import NavbarComponent from ".";
 
 export default {

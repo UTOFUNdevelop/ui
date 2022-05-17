@@ -36,13 +36,13 @@ const style = {
       md: "50px",
     },
   },
-  flexOnSmallScreen: {
+  flexOnBaseScreen: {
     display: {
       base: "flex",
       md: "none",
     },
   },
-  flexOnBigScreen: {
+  flexOnMdScreen: {
     display: {
       base: "none",
       md: "flex",
@@ -58,13 +58,7 @@ export default function Navbar({ items, _image }: NavbarProps) {
   ));
 
   return (
-    <Box
-      width="100%"
-      position="fixed"
-      left="0"
-      top="0"
-      backgroundColor="support"
-    >
+    <Box width="100%" position="fixed" left="0" top="0" backgroundColor="black">
       <HStack alignItems="center" justifyContent="end" {...style.navbar}>
         <Image
           marginRight="auto"
@@ -74,7 +68,7 @@ export default function Navbar({ items, _image }: NavbarProps) {
           {...style.logo}
           {..._image}
         />
-        <HStack {...style.flexOnBigScreen}>{menu}</HStack>
+        <HStack {...style.flexOnMdScreen}>{menu}</HStack>
         <IconButton
           backgroundColor="primary.500"
           width="10"
@@ -82,7 +76,7 @@ export default function Navbar({ items, _image }: NavbarProps) {
           borderRadius="md"
           onPress={toggleMenu}
           icon={<HamburgerIcon size="5" color="white" />}
-          {...style.flexOnSmallScreen}
+          {...style.flexOnBaseScreen}
         />
       </HStack>
       {isMenuOpen && (
@@ -90,7 +84,7 @@ export default function Navbar({ items, _image }: NavbarProps) {
           borderTopWidth={1}
           borderTopColor="background"
           py="2"
-          {...style.flexOnSmallScreen}
+          {...style.flexOnBaseScreen}
         >
           {menu}
         </Box>
