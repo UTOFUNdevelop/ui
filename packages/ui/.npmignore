@@ -1,0 +1,7 @@
+*
+
+# include all the files in src/lib
+!src/lib/**/*
+
+# then exclude all the stories
+*.stories.tsx

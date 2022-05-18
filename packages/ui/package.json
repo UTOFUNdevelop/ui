@@ -76,8 +76,5 @@
     "typescript": "^4.6.4",
     "webpack": "^5.72.0"
   },
-  "main": "src/lib/index.tsx",
-  "files": [
-    "src/lib/*/index.tsx"
-  ]
+  "main": "src/lib/index.tsx"
 }
