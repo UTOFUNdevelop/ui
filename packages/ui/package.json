@@ -1,6 +1,6 @@
 {
   "name": "@utofun/ui",
-  "version": "0.1.1",
+  "version": "0.1.16",
   "private": false,
   "dependencies": {
     "cra-template-typescript": "1.2.0",
