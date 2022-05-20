@@ -324,6 +324,10 @@ npm_install_eslint_config_prettier() {
   sash_npm_install_workspace --save-dev eslint-config-prettier
 }
 
+npm_install_jest() {
+  sash_npm_install_workspace jest
+}
+
 npm_install_link_workspace() {
   npm install
 }
