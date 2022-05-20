@@ -262,13 +262,11 @@ jq_package_json_npm_run_storybook_disable_eslint_plugin() {
 }
 
 jq_package_json_set_files_src_lib_index() {
-  sash_jq_replace '.main = "src/lib/index.tsx"' "$package_dir/package.json"
   sash_jq_replace '.files = ["src/lib/*/index.tsx"]' "$package_dir/package.json"
 }
 
 jq_package_json_set_main_src_lib_index() {
   sash_jq_replace '.main = "src/lib/index.tsx"' "$package_dir/package.json"
-  sash_jq_replace '.files = ["src/lib/*/index.tsx"]' "$package_dir/package.json"
 }
 
 jq_package_json_set_npm_test() {
