@@ -29,7 +29,7 @@ sash_last() {
 }
 
 sash_jq_replace() {
-  printf %s "$(jq "$@")" > "$(sash_last "$@")"
+  printf %s "$(jq "$@")" >"$(sash_last "$@")"
 }
 
 sash_npm_install_workspace() {
@@ -45,10 +45,11 @@ sash_sed_i() {
 }
 
 sash_switch_fall_through() {
-  state="$1"; shift
+  state="$1"
+  shift
   for command in "$@"; do
     if [ "$state" = "$command" ]; then
-      break;
+      break
     else
       shift
     fi
@@ -145,7 +146,7 @@ npx_sb_init() {
 }
 
 file_replace_src_app() {
-  cat <<'JAVASCRIPT' > "$package_dir/src/app.tsx"
+  cat <<'JAVASCRIPT' >"$package_dir/src/app.tsx"
 import React from "react";
 import { NativeBaseProvider, Box } from "native-base";
 
@@ -161,7 +162,7 @@ JAVASCRIPT
 
 file_replace_src_lib_nativebase() {
   mkdir -p "$package_dir/src/lib/NativeBase/"
-  cat <<'JAVASCRIPT' > "$package_dir/src/lib/NativeBase/index.stories.tsx"
+  cat <<'JAVASCRIPT' >"$package_dir/src/lib/NativeBase/index.stories.tsx"
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import React from "react";
 
@@ -184,7 +185,7 @@ Children.args = {
 };
 JAVASCRIPT
 
-  cat <<'JAVASCRIPT' > "$package_dir/src/lib/NativeBase/index.tsx"
+  cat <<'JAVASCRIPT' >"$package_dir/src/lib/NativeBase/index.tsx"
 import { Box, NativeBaseProvider } from "native-base";
 import PropTypes, { InferProps } from "prop-types";
 import React from "react";
@@ -221,7 +222,8 @@ jq_eslintrc_add_jest_to_eslint_env() {
 }
 
 jq_eslintrc_add_tsx_to_react_jsx_filename_extension() {
-  rules=$(cat <<'JSON'
+  rules=$(
+    cat <<'JSON'
 {
   "react/jsx-filename-extension": [
     "error",
@@ -234,12 +236,13 @@ jq_eslintrc_add_tsx_to_react_jsx_filename_extension() {
   ]
 }
 JSON
-)
+  )
   sash_jq_replace ".rules += $rules" "$package_dir/.eslintrc.json"
 }
 
 jq_eslintrc_ignore_custom_react_jsx_props_no_spreading() {
-  rules=$(cat <<'JSON'
+  rules=$(
+    cat <<'JSON'
 {
   "react/jsx-props-no-spreading": [
     "error",
@@ -252,12 +255,13 @@ jq_eslintrc_ignore_custom_react_jsx_props_no_spreading() {
   ]
 }
 JSON
-)
+  )
   sash_jq_replace ".rules += $rules" "$package_dir/.eslintrc.json"
 }
 
 jq_eslintrc_ignore_ts_import() {
-  overrides=$(cat <<'JSON'
+  overrides=$(
+    cat <<'JSON'
 [
   {
     "files": [
@@ -275,12 +279,12 @@ jq_eslintrc_ignore_ts_import() {
   }
 ]
 JSON
-)
+  )
   sash_jq_replace ".overrides += $overrides" "$package_dir/.eslintrc.json"
 }
 
 file_replace_eslintrc() {
-  cat <<'ESLINTIGNORE' > "$package_dir/.eslintignore"
+  cat <<'ESLINTIGNORE' >"$package_dir/.eslintignore"
 src/stories/Button.stories.tsx
 src/stories/Button.tsx
 src/stories/Header.stories.tsx
@@ -296,7 +300,8 @@ ESLINTIGNORE
 }
 
 jq_eslintrc_allow_stories_import_no_extraneous_dependencies() {
-  overrides=$(cat <<'JSON'
+  overrides=$(
+    cat <<'JSON'
 [
   {
     "files": ["*.stories.tsx"],
@@ -313,7 +318,7 @@ jq_eslintrc_allow_stories_import_no_extraneous_dependencies() {
   }
 ]
 JSON
-)
+  )
   sash_jq_replace ".overrides += $overrides" "$package_dir/.eslintrc.json"
 }
 
@@ -328,7 +333,7 @@ prettier --write --loglevel warn '**/*.js' '**/*.ts' '**/*.tsx'" \
 }
 
 file_replace_src_lib_index() {
-  cat <<'JAVASCRIPT' > "$package_dir/src/lib/index.tsx"
+  cat <<'JAVASCRIPT' >"$package_dir/src/lib/index.tsx"
 export { default as NativeBase } from "./NativeBase";
 export default null;
 JAVASCRIPT
