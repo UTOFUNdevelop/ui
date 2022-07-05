@@ -9,7 +9,7 @@ npm ci
 ## Development
 
 ```shell
-npm run dev --workspace @utofun/ui
+npm run storybook --workspace @utofun/ui
 ```
 
 ## Testing
