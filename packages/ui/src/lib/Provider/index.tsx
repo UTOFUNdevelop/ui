@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useMemo } from "react";
 import { NativeBaseProvider, extendTheme } from "native-base";
 import PropTypes, { InferProps } from "prop-types";
 
@@ -57,12 +57,25 @@ const theme = extendTheme({
 
 const propTypes = {
   children: PropTypes.node.isRequired,
+  translationFunc: PropTypes.func,
 };
 
 type ProviderProps = InferProps<typeof propTypes>;
 
-export default function Provider({ children }: ProviderProps) {
-  return <NativeBaseProvider theme={theme}>{children}</NativeBaseProvider>;
+const I18NContext = React.createContext({});
+export const useTranslation = () => useContext(I18NContext);
+
+export default function Provider({ children, translationFunc }: ProviderProps) {
+  const i18nValue = useMemo(() => ({ t: translationFunc }), [translationFunc]);
+  return (
+    <NativeBaseProvider theme={theme}>
+      <I18NContext.Provider value={i18nValue}>{children}</I18NContext.Provider>
+    </NativeBaseProvider>
+  );
 }
 
 Provider.propTypes = propTypes;
+
+Provider.defaultProps = {
+  translationFunc: (text: string) => text,
+};
