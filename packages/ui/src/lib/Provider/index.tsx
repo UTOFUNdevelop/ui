@@ -1,6 +1,7 @@
-import React, { useContext, useMemo } from "react";
+import React, { useMemo } from "react";
 import { NativeBaseProvider, extendTheme } from "native-base";
 import PropTypes, { InferProps } from "prop-types";
+import { I18NProvider } from "../i18n";
 
 const theme = extendTheme({
   colors: {
@@ -62,14 +63,11 @@ const propTypes = {
 
 type ProviderProps = InferProps<typeof propTypes>;
 
-const I18NContext = React.createContext({});
-export const useTranslation = () => useContext(I18NContext);
-
 export default function Provider({ children, translationFunc }: ProviderProps) {
   const i18nValue = useMemo(() => ({ t: translationFunc }), [translationFunc]);
   return (
     <NativeBaseProvider theme={theme}>
-      <I18NContext.Provider value={i18nValue}>{children}</I18NContext.Provider>
+      <I18NProvider value={i18nValue}>{children}</I18NProvider>
     </NativeBaseProvider>
   );
 }
