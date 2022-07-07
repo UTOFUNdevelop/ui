@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { NativeBaseProvider, extendTheme } from "native-base";
 import PropTypes, { InferProps } from "prop-types";
 import { I18NProvider } from "../i18n";
@@ -58,16 +58,16 @@ const theme = extendTheme({
 
 const propTypes = {
   children: PropTypes.node.isRequired,
-  translationFunc: PropTypes.func,
+  t: PropTypes.func,
 };
 
 type ProviderProps = InferProps<typeof propTypes>;
 
-export default function Provider({ children, translationFunc }: ProviderProps) {
-  const i18nValue = useMemo(() => ({ t: translationFunc }), [translationFunc]);
+export default function Provider({ children, t }: ProviderProps) {
   return (
     <NativeBaseProvider theme={theme}>
-      <I18NProvider value={i18nValue}>{children}</I18NProvider>
+      {/* translation function t must exist because we have default props */}
+      <I18NProvider value={t!}>{children}</I18NProvider>
     </NativeBaseProvider>
   );
 }
@@ -75,5 +75,5 @@ export default function Provider({ children, translationFunc }: ProviderProps) {
 Provider.propTypes = propTypes;
 
 Provider.defaultProps = {
-  translationFunc: (text: string) => text,
+  t: (text: string) => text,
 };
