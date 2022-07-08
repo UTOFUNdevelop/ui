@@ -1,6 +1,7 @@
 import React from "react";
 import { NativeBaseProvider, extendTheme } from "native-base";
 import PropTypes, { InferProps } from "prop-types";
+import { I18NProvider, propTypes as i18nPropTypes } from "../i18n";
 
 const theme = extendTheme({
   colors: {
@@ -57,12 +58,18 @@ const theme = extendTheme({
 
 const propTypes = {
   children: PropTypes.node.isRequired,
+  // eslint-disable-next-line react/require-default-props
+  t: i18nPropTypes.t,
 };
 
 type ProviderProps = InferProps<typeof propTypes>;
 
-export default function Provider({ children }: ProviderProps) {
-  return <NativeBaseProvider theme={theme}>{children}</NativeBaseProvider>;
+export default function Provider({ children, t }: ProviderProps) {
+  return (
+    <NativeBaseProvider theme={theme}>
+      <I18NProvider t={t}>{children}</I18NProvider>
+    </NativeBaseProvider>
+  );
 }
 
 Provider.propTypes = propTypes;
